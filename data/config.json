@@ -4,7 +4,7 @@
     "subtitulo": "[SUBTÍTULO]",
     "opcion_continuar": "Continuar",
     "opcion_nueva_partida": "Nueva partida",
-    "indicacion": "Flechas para elegir, Enter para aceptar, Esc para salir",
+    "indicacion": "Flechas o W/S para elegir, Enter para aceptar, Esc para salir",
     "tutorial": [
       "WASD o flechas: moverte",
       "Espacio: saltar",
@@ -15,7 +15,11 @@
   "pausa": {
     "titulo": "Pausa",
     "continuar": "Continuar",
-    "salir": "Salir"
+    "salir": "Salir",
+    "indicacion": "Flechas o W/S para elegir, Enter para aceptar"
+  },
+  "dialogo": {
+    "indicacion": "Enter o E para cerrar · Flechas para desplazar el texto"
   },
   "hud": {
     "formato_cartas": "Cartas: {n}/4",
@@ -53,11 +57,14 @@
   "oficina": {
     "codigo": "0000",
     "aviso_cerrada": "[AVISO SI TODAVÍA NO SE PUEDE ABRIR]",
-    "aviso_error": "[AVISO CÓDIGO INCORRECTO]"
+    "aviso_error": "[AVISO CÓDIGO INCORRECTO]",
+    "titulo_candado": "Candado",
+    "indicacion_candado": "Números para escribir, Retroceso para borrar, Enter para probar, E para salir"
   },
   "final": {
     "mensaje": "[MENSAJE DE LAUTARO]",
-    "imagen": "res://assets/personal/foto_final.png"
+    "imagen": "res://assets/personal/foto_final.png",
+    "indicacion": "Flechas para desplazar el texto · Esc para la pausa"
   },
   "audio": {
     "musica_final": ""
