@@ -6,6 +6,7 @@
     "opcion_nueva_partida": "Nueva partida",
     "indicacion": "Flechas o W/S para elegir, Enter o clic para aceptar, Esc para salir",
     "tutorial": [
+      "Mouse: mirar alrededor",
       "WASD o flechas: moverte",
       "Espacio: saltar",
       "E: interactuar",

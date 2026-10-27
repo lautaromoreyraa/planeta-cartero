@@ -39,6 +39,7 @@ static func correr(_arbol: SceneTree) -> PackedStringArray:
 	_probar_json_invalido(a)
 	_probar_archivo_inexistente(a)
 	_probar_valores_invalidos(a)
+	_probar_tutorial_incompleto(a)
 	_probar_prioridad_del_local(a)
 	_probar_config_del_repo(a)
 	_probar_placeholders_del_repo(a)
@@ -100,6 +101,18 @@ static func _probar_valores_invalidos(a: Afirmaciones) -> void:
 	a.verdadero(pocas.casas().size() == 4, "con menos de 4 casas se usan 4 casas por defecto")
 	a.verdadero(Configuracion.es_ruta_de_imagen_valida("res://assets/personal/foto.JPG"), "una foto de assets/personal es válida")
 	a.verdadero(not Configuracion.es_ruta_de_imagen_valida("res://assets/personal/../../scripts/x.png"), "una ruta con «..» no es válida")
+
+
+## RF-09 CA1: un tutorial sin alguna de las cinco acciones (por ejemplo,
+## sin la línea del mouse) se muestra igual pero no pasa la validación.
+static func _probar_tutorial_incompleto(a: Afirmaciones) -> void:
+	var cuatro: Configuracion = Configuracion.desde_texto('{"inicio": {"tutorial": ["a", "b", "c", "d"]}}')
+	a.verdadero(cuatro.tutorial(PackedStringArray()).size() == 4, "un tutorial de 4 líneas se muestra igual")
+	var problemas: PackedStringArray = cuatro.validar()
+	var avisa: bool = false
+	for problema: String in problemas:
+		avisa = avisa or problema.contains("inicio.tutorial")
+	a.verdadero(avisa, "RF-09 CA1: la validación no avisa que al tutorial le falta una acción")
 
 
 ## RF-27 CA1 a CA3: local presente, ausente e inválido.

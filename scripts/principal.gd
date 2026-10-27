@@ -12,6 +12,7 @@ extends Node3D
 
 ## Textos por defecto si falta la clave en el config (RF-22 CA2).
 const TUTORIAL_POR_DEFECTO: PackedStringArray = [
+	"Mouse: mirar alrededor",
 	"WASD o flechas: moverte",
 	"Espacio: saltar",
 	"E: interactuar",
