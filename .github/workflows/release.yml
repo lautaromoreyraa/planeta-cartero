@@ -99,15 +99,27 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
+        # Las notas salen del mensaje del tag anotado, leído por la API:
+        # gh no admite --notes-from-tag junto con --repo, y el checkout
+        # superficial no garantiza que el objeto del tag esté en el clon.
         run: |
           set -euo pipefail
           opciones=()
           case "$TAG" in
             v0.*) opciones+=(--prerelease) ;;
           esac
+          ref="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")"
+          tipo="$(jq -r '.object.type' <<<"$ref")"
+          sha="$(jq -r '.object.sha' <<<"$ref")"
+          if [ "$tipo" != "tag" ]; then
+            echo "El tag ${TAG} no es anotado" >&2
+            exit 1
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/git/tags/${sha}" --jq '.message' \
+            > "$RUNNER_TEMP/notas.md"
           gh release create "$TAG" build/PlanetaCartero.exe \
             --repo "$GITHUB_REPOSITORY" \
             --title "Planeta Cartero $TAG" \
-            --notes-from-tag \
+            --notes-file "$RUNNER_TEMP/notas.md" \
             --verify-tag \
             "${opciones[@]}"
