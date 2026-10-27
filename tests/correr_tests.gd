@@ -17,6 +17,7 @@ const PRUEBAS: Array[String] = [
 	"res://tests/test_cartas_en_escena.gd",
 	"res://tests/test_candado.gd",
 	"res://tests/test_secuencia_de_entrega.gd",
+	"res://tests/test_guia_de_objetivo.gd",
 	"res://tests/test_guardado.gd",
 	"res://tests/test_recorrido_completo.gd",
 ]

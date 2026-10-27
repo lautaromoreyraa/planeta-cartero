@@ -24,6 +24,7 @@ static func correr(_arbol: SceneTree) -> PackedStringArray:
 	_probar_girar_hacia(a)
 	_probar_rotar_hacia(a)
 	_probar_girar_vector_hacia(a)
+	_probar_angulo_en_pantalla(a)
 	_probar_direccion_relativa(a)
 	_probar_transform_en_superficie(a)
 	_probar_fuera_de_rango(a)
@@ -100,6 +101,20 @@ static func _probar_girar_vector_hacia(a: Afirmaciones) -> void:
 	a.cerca(Vector3.UP.angle_to(opuesto), paso, TOLERANCIA, "girar_vector_hacia gira también hacia el opuesto")
 	var cerca_del_objetivo: Vector3 = Vector3(0.01, 1, 0).normalized()
 	a.vectores_cerca(GeometriaEsferica.girar_vector_hacia(Vector3.UP, cerca_del_objetivo, paso), cerca_del_objetivo, TOLERANCIA, "girar_vector_hacia llega si el ángulo alcanza")
+
+
+## RF-30 CA2: con el objetivo adelante la flecha apunta hacia arriba de la
+## pantalla y con el objetivo a la derecha, hacia la derecha.
+static func _probar_angulo_en_pantalla(a: Afirmaciones) -> void:
+	var camara: Basis = Basis(Vector3.RIGHT, deg_to_rad(-25.0))
+	var desde: Vector3 = Vector3(0, 10, 0)
+	a.cerca(GeometriaEsferica.angulo_en_pantalla(desde, Vector3(0, 9, -5), Vector3.UP, camara), 0.0, TOLERANCIA, "objetivo adelante: flecha hacia arriba")
+	a.cerca(GeometriaEsferica.angulo_en_pantalla(desde, Vector3(5, 9, 0), Vector3.UP, camara), PI / 2.0, TOLERANCIA, "objetivo a la derecha: flecha a la derecha")
+	a.cerca(GeometriaEsferica.angulo_en_pantalla(desde, Vector3(-5, 9, 0), Vector3.UP, camara), -PI / 2.0, TOLERANCIA, "objetivo a la izquierda: flecha a la izquierda")
+	a.cerca(absf(GeometriaEsferica.angulo_en_pantalla(desde, Vector3(0, 9, 5), Vector3.UP, camara)), PI, TOLERANCIA, "objetivo atrás: flecha hacia abajo")
+	# Cámara girada 90° a la derecha: lo que estaba a la derecha queda adelante.
+	var girada: Basis = Basis(Vector3.UP, -PI / 2.0) * camara
+	a.cerca(GeometriaEsferica.angulo_en_pantalla(desde, Vector3(5, 9, 0), Vector3.UP, girada), 0.0, TOLERANCIA, "la flecha sigue la vista de la cámara")
 
 
 static func _probar_direccion_relativa(a: Afirmaciones) -> void:

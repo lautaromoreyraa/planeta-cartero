@@ -106,6 +106,21 @@ static func direccion_relativa(entrada: Vector2, base_camara: Basis, arriba: Vec
 	return direccion.limit_length(1.0)
 
 
+## Ángulo en radianes con el que una flecha de pantalla apunta desde
+## `desde` hacia `hacia`, según la vista de la cámara (RF-30 CA2): 0 es hacia
+## arriba de la pantalla (lo que W aleja de la cámara) y crece en sentido
+## horario, como `Control.rotation`. Se mide sobre el plano tangente en
+## `desde`, así un objetivo del otro lado del planeta apunta por el camino
+## más corto sobre la superficie.
+static func angulo_en_pantalla(desde: Vector3, hacia: Vector3, arriba: Vector3, base_camara: Basis) -> float:
+	var direccion: Vector3 = proyectar_en_plano(hacia - desde, arriba)
+	var adelante: Vector3 = direccion_relativa(Vector2(0.0, -1.0), base_camara, arriba)
+	if direccion.length_squared() < EPSILON or adelante.length_squared() < EPSILON:
+		return 0.0
+	var derecha: Vector3 = adelante.cross(arriba.normalized())
+	return atan2(direccion.dot(derecha), direccion.dot(adelante))
+
+
 ## Transform de un objeto apoyado en la superficie: origen a `distancia` del
 ## centro según latitud y longitud (radianes), Y hacia afuera y girado `giro`
 ## radianes alrededor de su vertical.

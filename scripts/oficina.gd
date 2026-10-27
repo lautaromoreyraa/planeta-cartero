@@ -24,6 +24,15 @@ func _ready() -> void:
 	_interactuable_de_la_carta.interactuado.connect(carta_final_usada.emit)
 
 
+## Dónde está la puerta y dónde la carta final, para la guía (RF-30 CA6).
+func posicion_de_la_puerta() -> Vector3:
+	return _interactuable_de_la_puerta.global_position
+
+
+func posicion_de_la_carta_final() -> Vector3:
+	return _interactuable_de_la_carta.global_position
+
+
 ## Abre la puerta para siempre en esta partida (RF-18 CA3).
 func abrir() -> void:
 	_interactuable_de_la_puerta.habilitado = false
