@@ -33,6 +33,7 @@ var mostrar_tutorial: bool = false
 var ruta_de_guardado: String = ""
 
 @onready var _hud: Hud = $Hud
+@onready var _jugador: Jugador = $Jugador
 @onready var _detector: DetectorDeInteraccion = $Jugador/DetectorDeInteraccion
 @onready var _cartas: Node3D = $Cartas
 @onready var _casas: Node3D = $Casas
@@ -93,6 +94,7 @@ func _restaurar(estado: EstadoDePartida) -> void:
 	for carta: Carta in _cartas_en_el_planeta():
 		if estado.cartas_recogidas.has(carta.id):
 			carta.retirar()
+		_jugador.hacer_gesto(Personaje.Gesto.RECOGER)
 	for id: String in estado.cartas_recogidas:
 		_inventario.recoger(id)
 	_secuencia.restaurar(estado.entregas, estado.digitos_revelados)
@@ -141,6 +143,7 @@ func _al_juntar_carta(id: String) -> void:
 
 
 func _al_usar_un_buzon(casa: CasaConBuzon) -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	match _secuencia.entregar(casa.id, _cartas_en_mano()):
 		SecuenciaDeEntrega.Resultado.CORRECTA:
 			_mostrar_recuerdo(_secuencia.entregas())
@@ -166,11 +169,13 @@ func _mostrar_recuerdo(numero: int) -> void:
 
 
 func _al_leer_el_cartel() -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	_dialogo.mostrar(config.texto("entrega.pista", PISTA_POR_DEFECTO))
 
 
 ## La puerta se habilita al completar la zona 2 (RF-18).
 func _al_usar_la_puerta() -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	if _secuencia.completa():
 		_panel_del_candado.abrir()
 	else:
@@ -181,6 +186,7 @@ func _al_usar_la_puerta() -> void:
 func _al_abrir_el_candado() -> void:
 	_candado_abierto = true
 	_oficina.abrir()
+	_jugador.hacer_gesto(Personaje.Gesto.FESTEJAR)
 	_guardar()
 
 

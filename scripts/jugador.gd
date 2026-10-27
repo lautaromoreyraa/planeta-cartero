@@ -6,6 +6,8 @@ extends CharacterBody3D
 ## En cada frame «arriba» se recalcula desde el centro (RT-09): se actualiza
 ## `up_direction` para que `is_on_floor()` funcione en cualquier punto, la
 ## gravedad tira hacia el centro y el cuerpo se alinea con la superficie.
+## El modelo animado vive en su propia escena (`Personaje`): el jugador sólo
+## le cuenta qué está haciendo.
 
 ## Metros por segundo. Con el radio del planeta, una vuelta dura unos 12,6 s.
 const VELOCIDAD: float = 5.0
@@ -30,6 +32,8 @@ const VELOCIDAD_DE_GIRO: float = 4.0 * PI
 const DISTANCIA_MAXIMA: float = Planeta.RADIO + 15.0
 ## Más cerca que esto del centro atravesó el suelo: también se reubica.
 const DISTANCIA_MINIMA: float = Planeta.RADIO * 0.5
+
+@onready var _personaje: Personaje = $Personaje
 
 ## Lugar despejado donde empieza la partida; se usa también para reubicar.
 var _punto_seguro: Vector3
@@ -69,6 +73,9 @@ func _physics_process(delta: float) -> void:
 	_alinear(arriba, rumbo)
 
 	move_and_slide()
+	# Después del deslizamiento: contra una pared la velocidad real es cero y
+	# el personaje no tiene que caminar en el lugar.
+	_personaje.actualizar(is_on_floor(), rapidez(), velocity.dot(arriba))
 
 
 ## Hacia dónde mira el personaje sobre la superficie; la cámara lo sigue.
@@ -76,10 +83,16 @@ func mirada() -> Vector3:
 	return -global_basis.z
 
 
-## Velocidad sobre la superficie, en metros por segundo.
+## Velocidad sobre la superficie, en metros por segundo. La cámara la usa
+## para saber si el personaje camina (RF-28 CA5).
 func rapidez() -> float:
 	var arriba: Vector3 = GeometriaEsferica.arriba_en(global_position, Planeta.CENTRO)
 	return GeometriaEsferica.proyectar_en_plano(velocity, arriba).length()
+
+
+## Animación de un momento puntual: recoger, interactuar o festejar (RF-29 CA4).
+func hacer_gesto(gesto: Personaje.Gesto) -> void:
+	_personaje.hacer_gesto(gesto)
 
 
 func _alinear(arriba: Vector3, mirada_deseada: Vector3) -> void:

@@ -1,24 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/jugador.gd" id="1_jugador"]
 [ext_resource type="Script" path="res://scripts/detector_de_interaccion.gd" id="2_detector"]
-
-[sub_resource type="StandardMaterial3D" id="Material_cuerpo"]
-albedo_color = Color(0.98, 0.71, 0.76, 1)
-roughness = 1.0
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_cuerpo"]
-material = SubResource("Material_cuerpo")
-radius = 0.35
-height = 1.6
-
-[sub_resource type="StandardMaterial3D" id="Material_gorra"]
-albedo_color = Color(0.55, 0.66, 0.9, 1)
-roughness = 1.0
-
-[sub_resource type="BoxMesh" id="BoxMesh_visera"]
-material = SubResource("Material_gorra")
-size = Vector3(0.3, 0.08, 0.3)
+[ext_resource type="PackedScene" path="res://scenes/personaje.tscn" id="3_personaje"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cuerpo"]
 radius = 0.35
@@ -28,13 +12,7 @@ height = 1.6
 floor_snap_length = 0.3
 script = ExtResource("1_jugador")
 
-[node name="Cuerpo" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-mesh = SubResource("CapsuleMesh_cuerpo")
-
-[node name="Visera" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.35)
-mesh = SubResource("BoxMesh_visera")
+[node name="Personaje" parent="." instance=ExtResource("3_personaje")]
 
 [node name="Colision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
