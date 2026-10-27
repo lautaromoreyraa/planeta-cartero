@@ -1,0 +1,79 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/principal.gd" id="1_principal"]
+[ext_resource type="PackedScene" path="res://scenes/casa.tscn" id="2_casa"]
+[ext_resource type="PackedScene" path="res://scenes/caja.tscn" id="3_caja"]
+[ext_resource type="PackedScene" path="res://scenes/plataforma.tscn" id="4_plataforma"]
+[ext_resource type="PackedScene" path="res://scenes/planeta.tscn" id="5_planeta"]
+[ext_resource type="PackedScene" path="res://scenes/jugador.tscn" id="6_jugador"]
+[ext_resource type="PackedScene" path="res://scenes/camara_seguidora.tscn" id="7_camara"]
+
+[sub_resource type="Environment" id="Environment_pastel"]
+background_mode = 1
+background_color = Color(0.76, 0.88, 0.96, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 0.97, 0.95, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[node name="Principal" type="Node3D"]
+script = ExtResource("1_principal")
+
+[node name="Entorno" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pastel")
+
+[node name="Planeta" parent="." instance=ExtResource("5_planeta")]
+
+[node name="Jugador" parent="." instance=ExtResource("6_jugador")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.5, 0)
+
+[node name="CamaraSeguidora" parent="." node_paths=PackedStringArray("objetivo") instance=ExtResource("7_camara")]
+objetivo = NodePath("../Jugador")
+
+[node name="Objetos" type="Node3D" parent="."]
+
+[node name="Casa1" parent="Objetos" instance=ExtResource("2_casa")]
+latitud = 30.0
+longitud = 0.0
+
+[node name="Casa2" parent="Objetos" instance=ExtResource("2_casa")]
+latitud = 10.0
+longitud = 90.0
+giro = 30.0
+
+[node name="Casa3" parent="Objetos" instance=ExtResource("2_casa")]
+latitud = -20.0
+longitud = 180.0
+giro = -20.0
+
+[node name="Casa4" parent="Objetos" instance=ExtResource("2_casa")]
+latitud = 0.0
+longitud = -90.0
+giro = 45.0
+
+[node name="Caja1" parent="Objetos" instance=ExtResource("3_caja")]
+latitud = 45.0
+longitud = 45.0
+giro = 15.0
+
+[node name="Caja2" parent="Objetos" instance=ExtResource("3_caja")]
+latitud = -45.0
+longitud = 120.0
+
+[node name="Caja3" parent="Objetos" instance=ExtResource("3_caja")]
+latitud = -70.0
+longitud = -30.0
+giro = 30.0
+
+[node name="Caja4" parent="Objetos" instance=ExtResource("3_caja")]
+latitud = 20.0
+longitud = -140.0
+giro = 10.0
+
+[node name="Plataforma1" parent="Objetos" instance=ExtResource("4_plataforma")]
+latitud = 50.0
+longitud = -60.0
+
+[node name="Plataforma2" parent="Objetos" instance=ExtResource("4_plataforma")]
+latitud = -10.0
+longitud = 45.0
