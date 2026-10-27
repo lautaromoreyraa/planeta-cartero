@@ -74,6 +74,15 @@ static func cargar(ruta_local: String = RUTA_LOCAL, ruta_base: String = RUTA) ->
 	return desde_archivo(ruta_base)
 
 
+## Config activo para el juego: informa en la salida los problemas de
+## lectura y de validación, y los que aparezcan después (RF-22 CA2).
+static func cargar_para_el_juego() -> Configuracion:
+	var config: Configuracion = cargar()
+	config.activar_salida()
+	config.validar()
+	return config
+
+
 static func desde_archivo(ruta: String) -> Configuracion:
 	if not FileAccess.file_exists(ruta):
 		var vacia: Configuracion = Configuracion.new()
@@ -138,7 +147,9 @@ func texto(clave: String, por_defecto: String) -> String:
 	var valor: Variant = _buscar(clave)
 	if valor is String:
 		return valor
-	_avisar("Falta el texto «%s» en el config; se usa «%s»." % [clave, por_defecto])
+	# El aviso no nombra el valor por defecto para que la validación y las
+	# lecturas del juego dejen el mismo mensaje y se informe una sola vez.
+	_avisar("Falta el texto «%s» en el config; se usa el texto por defecto." % clave)
 	return por_defecto
 
 

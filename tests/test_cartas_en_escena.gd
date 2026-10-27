@@ -79,11 +79,14 @@ static func _avanzar(arbol: SceneTree, frames: int) -> void:
 		await arbol.physics_frame
 
 
+## La E se manda como evento porque el detector la lee como evento.
 static func _apretar_e(arbol: SceneTree) -> void:
-	Input.action_press("interact")
-	await _avanzar(arbol, 2)
-	Input.action_release("interact")
-	await _avanzar(arbol, 2)
+	for apretada: bool in [true, false]:
+		var evento: InputEventAction = InputEventAction.new()
+		evento.action = &"interact"
+		evento.pressed = apretada
+		Input.parse_input_event(evento)
+		await _avanzar(arbol, 2)
 
 
 static func _descargar(arbol: SceneTree, escena: Node3D) -> void:

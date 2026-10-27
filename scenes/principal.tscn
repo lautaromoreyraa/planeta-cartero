@@ -1,7 +1,7 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/principal.gd" id="1_principal"]
-[ext_resource type="PackedScene" path="res://scenes/casa.tscn" id="2_casa"]
+[ext_resource type="PackedScene" path="res://scenes/casa_con_buzon.tscn" id="2_casa"]
 [ext_resource type="PackedScene" path="res://scenes/caja.tscn" id="3_caja"]
 [ext_resource type="PackedScene" path="res://scenes/plataforma.tscn" id="4_plataforma"]
 [ext_resource type="PackedScene" path="res://scenes/planeta.tscn" id="5_planeta"]
@@ -9,6 +9,11 @@
 [ext_resource type="PackedScene" path="res://scenes/camara_seguidora.tscn" id="7_camara"]
 [ext_resource type="PackedScene" path="res://scenes/carta.tscn" id="8_carta"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_hud"]
+[ext_resource type="PackedScene" path="res://scenes/cartel.tscn" id="10_cartel"]
+[ext_resource type="PackedScene" path="res://scenes/oficina.tscn" id="11_oficina"]
+[ext_resource type="PackedScene" path="res://scenes/dialogo.tscn" id="12_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/panel_del_candado.tscn" id="13_candado"]
+[ext_resource type="PackedScene" path="res://scenes/menu_de_pausa.tscn" id="14_pausa"]
 
 [sub_resource type="Environment" id="Environment_pastel"]
 background_mode = 1
@@ -32,26 +37,37 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.5, 0)
 [node name="CamaraSeguidora" parent="." node_paths=PackedStringArray("objetivo") instance=ExtResource("7_camara")]
 objetivo = NodePath("../Jugador")
 
-[node name="Objetos" type="Node3D" parent="."]
+[node name="Casas" type="Node3D" parent="."]
 
-[node name="Casa1" parent="Objetos" instance=ExtResource("2_casa")]
+[node name="Casa1" parent="Casas" instance=ExtResource("2_casa")]
 latitud = 30.0
 longitud = 0.0
 
-[node name="Casa2" parent="Objetos" instance=ExtResource("2_casa")]
+[node name="Casa2" parent="Casas" instance=ExtResource("2_casa")]
 latitud = 10.0
 longitud = 90.0
 giro = 30.0
 
-[node name="Casa3" parent="Objetos" instance=ExtResource("2_casa")]
+[node name="Casa3" parent="Casas" instance=ExtResource("2_casa")]
 latitud = -20.0
 longitud = 180.0
 giro = -20.0
 
-[node name="Casa4" parent="Objetos" instance=ExtResource("2_casa")]
+[node name="Casa4" parent="Casas" instance=ExtResource("2_casa")]
 latitud = 0.0
 longitud = -90.0
 giro = 45.0
+
+[node name="Cartel" parent="." instance=ExtResource("10_cartel")]
+latitud = 75.0
+longitud = 180.0
+giro = 180.0
+
+[node name="Oficina" parent="." instance=ExtResource("11_oficina")]
+latitud = 0.0
+longitud = 135.0
+
+[node name="Objetos" type="Node3D" parent="."]
 
 [node name="Caja1" parent="Objetos" instance=ExtResource("3_caja")]
 latitud = 45.0
@@ -105,3 +121,9 @@ latitud = -30.0
 longitud = 150.0
 
 [node name="Hud" parent="." instance=ExtResource("9_hud")]
+
+[node name="Dialogo" parent="." instance=ExtResource("12_dialogo")]
+
+[node name="PanelDelCandado" parent="." instance=ExtResource("13_candado")]
+
+[node name="MenuDePausa" parent="." instance=ExtResource("14_pausa")]

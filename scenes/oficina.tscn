@@ -1,0 +1,148 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="Script" path="res://scripts/oficina.gd" id="1_oficina"]
+[ext_resource type="Script" path="res://scripts/interactuable.gd" id="2_interactuable"]
+
+[sub_resource type="StandardMaterial3D" id="Material_paredes"]
+albedo_color = Color(0.76, 0.9, 0.8, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_techo"]
+albedo_color = Color(0.93, 0.6, 0.6, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_puerta"]
+albedo_color = Color(0.62, 0.52, 0.45, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_carta"]
+albedo_color = Color(1, 0.85, 0.88, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_4x3_5x0_2_paredes"]
+material = SubResource("Material_paredes")
+size = Vector3(4, 3.5, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4x3_5x0_2"]
+size = Vector3(4, 3.5, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0_2x3_5x4_paredes"]
+material = SubResource("Material_paredes")
+size = Vector3(0.2, 3.5, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0_2x3_5x4"]
+size = Vector3(0.2, 3.5, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1_3x3_5x0_2_paredes"]
+material = SubResource("Material_paredes")
+size = Vector3(1.3, 3.5, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1_3x3_5x0_2"]
+size = Vector3(1.3, 3.5, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1_4x0_8x0_2_paredes"]
+material = SubResource("Material_paredes")
+size = Vector3(1.4, 0.8, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1_4x0_8x0_2"]
+size = Vector3(1.4, 0.8, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4_4x0_2x4_4_techo"]
+material = SubResource("Material_techo")
+size = Vector3(4.4, 0.2, 4.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4_4x0_2x4_4"]
+size = Vector3(4.4, 0.2, 4.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1_4x2_7x0_2_puerta"]
+material = SubResource("Material_puerta")
+size = Vector3(1.4, 2.7, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1_4x2_7x0_2"]
+size = Vector3(1.4, 2.7, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_carta"]
+material = SubResource("Material_carta")
+size = Vector3(0.5, 0.34, 0.05)
+
+[node name="Oficina" type="StaticBody3D"]
+script = ExtResource("1_oficina")
+
+[node name="ParedDelFondo" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -1.9)
+mesh = SubResource("BoxMesh_4x3_5x0_2_paredes")
+
+[node name="ColisionParedDelFondo" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -1.9)
+shape = SubResource("BoxShape3D_4x3_5x0_2")
+
+[node name="ParedIzquierda" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 1.25, 0)
+mesh = SubResource("BoxMesh_0_2x3_5x4_paredes")
+
+[node name="ColisionParedIzquierda" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 1.25, 0)
+shape = SubResource("BoxShape3D_0_2x3_5x4")
+
+[node name="ParedDerecha" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 1.25, 0)
+mesh = SubResource("BoxMesh_0_2x3_5x4_paredes")
+
+[node name="ColisionParedDerecha" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 1.25, 0)
+shape = SubResource("BoxShape3D_0_2x3_5x4")
+
+[node name="FrenteIzquierdo" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 1.25, 1.9)
+mesh = SubResource("BoxMesh_1_3x3_5x0_2_paredes")
+
+[node name="ColisionFrenteIzquierdo" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 1.25, 1.9)
+shape = SubResource("BoxShape3D_1_3x3_5x0_2")
+
+[node name="FrenteDerecho" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 1.25, 1.9)
+mesh = SubResource("BoxMesh_1_3x3_5x0_2_paredes")
+
+[node name="ColisionFrenteDerecho" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 1.25, 1.9)
+shape = SubResource("BoxShape3D_1_3x3_5x0_2")
+
+[node name="Dintel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 1.9)
+mesh = SubResource("BoxMesh_1_4x0_8x0_2_paredes")
+
+[node name="ColisionDintel" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 1.9)
+shape = SubResource("BoxShape3D_1_4x0_8x0_2")
+
+[node name="Techo" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 0)
+mesh = SubResource("BoxMesh_4_4x0_2x4_4_techo")
+
+[node name="ColisionTecho" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 0)
+shape = SubResource("BoxShape3D_4_4x0_2x4_4")
+
+[node name="Puerta" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 1.9)
+
+[node name="Malla" type="MeshInstance3D" parent="Puerta"]
+mesh = SubResource("BoxMesh_1_4x2_7x0_2_puerta")
+
+[node name="Colision" type="CollisionShape3D" parent="Puerta"]
+shape = SubResource("BoxShape3D_1_4x2_7x0_2")
+
+[node name="InteractuableDeLaPuerta" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.5)
+script = ExtResource("2_interactuable")
+
+[node name="CartaFinal" type="Node3D" parent="."]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 1)
+
+[node name="Malla" type="MeshInstance3D" parent="CartaFinal"]
+mesh = SubResource("BoxMesh_carta")
+
+[node name="Interactuable" type="Node3D" parent="CartaFinal"]
+script = ExtResource("2_interactuable")

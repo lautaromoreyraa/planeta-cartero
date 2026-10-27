@@ -6,6 +6,10 @@ extends Node3D
 ## Va como hijo del jugador, a la altura del pecho, para que la distancia se
 ## mida desde el cuerpo y no desde los pies. Avisa con una señal cuando
 ## cambia el objeto en rango, y el HUD la usa para mostrar el indicador.
+##
+## La E se lee como evento y no consultando el estado de la tecla: así la E
+## que cierra un diálogo, que el diálogo consume, no vuelve a abrir el mismo
+## objeto en el primer frame después de la pausa.
 
 signal objetivo_cambiado(objetivo: Interactuable)
 
@@ -18,11 +22,16 @@ var _objetivo: Interactuable = null
 
 func _physics_process(_delta: float) -> void:
 	_actualizar_objetivo()
-	if _objetivo != null and Input.is_action_just_pressed("interact"):
-		_objetivo.interactuar()
-		# El objeto pudo retirarse al usarlo; se vuelve a elegir en el mismo
-		# frame para no quedar apuntando a algo que se va a liberar.
-		_actualizar_objetivo()
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if _objetivo == null or not evento.is_action_pressed("interact"):
+		return
+	get_viewport().set_input_as_handled()
+	_objetivo.interactuar()
+	# El objeto pudo retirarse al usarlo; se vuelve a elegir enseguida para
+	# no quedar apuntando a algo que se va a liberar.
+	_actualizar_objetivo()
 
 
 func _actualizar_objetivo() -> void:

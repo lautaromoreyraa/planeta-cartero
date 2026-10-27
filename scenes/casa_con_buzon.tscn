@@ -1,0 +1,63 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/casa.tscn" id="1_casa"]
+[ext_resource type="Script" path="res://scripts/casa_con_buzon.gd" id="2_casa_con_buzon"]
+[ext_resource type="Script" path="res://scripts/interactuable.gd" id="3_interactuable"]
+
+[sub_resource type="StandardMaterial3D" id="Material_poste"]
+albedo_color = Color(0.62, 0.52, 0.45, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_poste"]
+material = SubResource("Material_poste")
+size = Vector3(0.12, 1, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Material_caja"]
+albedo_color = Color(0.55, 0.66, 0.9, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_caja"]
+material = SubResource("Material_caja")
+size = Vector3(0.45, 0.35, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Material_bandera"]
+albedo_color = Color(0.93, 0.45, 0.5, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_bandera"]
+material = SubResource("Material_bandera")
+size = Vector3(0.04, 0.3, 0.12)
+
+[node name="CasaConBuzon" instance=ExtResource("1_casa")]
+script = ExtResource("2_casa_con_buzon")
+
+[node name="Buzon" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, 0.8)
+
+[node name="Poste" type="MeshInstance3D" parent="Buzon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+mesh = SubResource("BoxMesh_poste")
+
+[node name="Caja" type="MeshInstance3D" parent="Buzon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_caja")
+
+[node name="Bandera" type="Node3D" parent="Buzon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1, 0.15)
+
+[node name="Malla" type="MeshInstance3D" parent="Buzon/Bandera"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("BoxMesh_bandera")
+
+[node name="Rotulo" type="Label3D" parent="Buzon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+billboard = 1
+modulate = Color(0.2, 0.18, 0.3, 1)
+outline_modulate = Color(1, 1, 1, 1)
+font_size = 48
+outline_size = 12
+pixel_size = 0.004
+
+[node name="Interactuable" type="Node3D" parent="Buzon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+script = ExtResource("3_interactuable")
