@@ -94,7 +94,7 @@ static func _descargar(arbol: SceneTree, escena: Node3D) -> void:
 
 
 static func _texto_del_hud(escena: Node3D) -> String:
-	var etiqueta: Label = escena.get_node("Hud/Cartas")
+	var etiqueta: Label = escena.get_node("Hud/Lineas/Cartas")
 	return etiqueta.text
 
 
