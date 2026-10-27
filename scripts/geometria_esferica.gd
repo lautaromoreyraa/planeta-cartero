@@ -67,6 +67,20 @@ static func angulo_en_plano(a: Vector3, b: Vector3, eje: Vector3) -> float:
 	return pa.angle_to(pb)
 
 
+## Gira el vector unitario `actual` hacia `objetivo` como mucho
+## `angulo_maximo` radianes. Acota el giro del «arriba» de la cámara cuando
+## el personaje se reubica de golpe (RNF-14).
+static func girar_vector_hacia(actual: Vector3, objetivo: Vector3, angulo_maximo: float) -> Vector3:
+	var angulo: float = actual.angle_to(objetivo)
+	if angulo <= angulo_maximo:
+		return objetivo.normalized()
+	var eje: Vector3 = actual.cross(objetivo)
+	if eje.length_squared() < EPSILON:
+		# Opuestos: cualquier eje perpendicular sirve para empezar a girar.
+		eje = actual.cross(Vector3.RIGHT if absf(actual.x) < 0.9 else Vector3.FORWARD)
+	return actual.rotated(eje.normalized(), angulo_maximo).normalized()
+
+
 ## Rota `actual` hacia `objetivo` sin superar `angulo_maximo` radianes.
 ## Es el límite de velocidad de giro de la cámara (RNF-14).
 static func rotar_hacia(actual: Quaternion, objetivo: Quaternion, angulo_maximo: float) -> Quaternion:

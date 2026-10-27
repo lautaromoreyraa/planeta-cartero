@@ -23,6 +23,7 @@ static func correr(_arbol: SceneTree) -> PackedStringArray:
 	_probar_transporte_por_los_polos(a)
 	_probar_girar_hacia(a)
 	_probar_rotar_hacia(a)
+	_probar_girar_vector_hacia(a)
 	_probar_direccion_relativa(a)
 	_probar_transform_en_superficie(a)
 	_probar_fuera_de_rango(a)
@@ -88,6 +89,17 @@ static func _probar_rotar_hacia(a: Afirmaciones) -> void:
 	var cerca_del_objetivo: Quaternion = Quaternion(Vector3.UP, 0.01)
 	var llegado: Quaternion = GeometriaEsferica.rotar_hacia(desde, cerca_del_objetivo, paso)
 	a.verdadero(llegado.is_equal_approx(cerca_del_objetivo), "rotar_hacia llega si el ángulo alcanza")
+
+
+static func _probar_girar_vector_hacia(a: Afirmaciones) -> void:
+	var paso: float = PI / 60.0
+	var girado: Vector3 = GeometriaEsferica.girar_vector_hacia(Vector3.UP, Vector3.RIGHT, paso)
+	a.cerca(Vector3.UP.angle_to(girado), paso, TOLERANCIA, "girar_vector_hacia respeta el ángulo máximo")
+	a.verdadero(girado.dot(Vector3.RIGHT) > 0.0, "girar_vector_hacia gira hacia el objetivo")
+	var opuesto: Vector3 = GeometriaEsferica.girar_vector_hacia(Vector3.UP, Vector3.DOWN, paso)
+	a.cerca(Vector3.UP.angle_to(opuesto), paso, TOLERANCIA, "girar_vector_hacia gira también hacia el opuesto")
+	var cerca_del_objetivo: Vector3 = Vector3(0.01, 1, 0).normalized()
+	a.vectores_cerca(GeometriaEsferica.girar_vector_hacia(Vector3.UP, cerca_del_objetivo, paso), cerca_del_objetivo, TOLERANCIA, "girar_vector_hacia llega si el ángulo alcanza")
 
 
 static func _probar_direccion_relativa(a: Afirmaciones) -> void:

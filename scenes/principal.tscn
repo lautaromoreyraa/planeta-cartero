@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/principal.gd" id="1_principal"]
 [ext_resource type="PackedScene" path="res://scenes/casa_con_buzon.tscn" id="2_casa"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/dialogo.tscn" id="12_dialogo"]
 [ext_resource type="PackedScene" path="res://scenes/panel_del_candado.tscn" id="13_candado"]
 [ext_resource type="PackedScene" path="res://scenes/menu_de_pausa.tscn" id="14_pausa"]
+[ext_resource type="Script" path="res://scripts/control_del_cursor.gd" id="15_cursor"]
 
 [sub_resource type="Environment" id="Environment_pastel"]
 background_mode = 1
@@ -28,6 +29,10 @@ script = ExtResource("1_principal")
 
 [node name="Entorno" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_pastel")
+
+[node name="ControlDelCursor" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("15_cursor")
 
 [node name="Planeta" parent="." instance=ExtResource("5_planeta")]
 
