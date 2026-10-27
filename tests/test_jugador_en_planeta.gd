@@ -1,8 +1,9 @@
 extends SceneTree
 
-## Test de integración del hito 1: carga la escena principal, simula física
-## con teclas apretadas por código y mide lo que piden los criterios de
-## RF-01 a RF-05, RNF-13 y RNF-14. Corre en tiempo real (unos 12 s).
+## Test de integración del personaje y la cámara: carga la escena principal,
+## simula física con teclas apretadas por código y mide lo que piden los
+## criterios de RF-01 a RF-05, RNF-13 y RNF-14. Corre en tiempo real (unos
+## 15 s).
 ## Se corre solo con `godot --headless --script res://tests/test_jugador_en_planeta.gd`.
 
 const Afirmaciones := preload("res://tests/afirmaciones.gd")
@@ -25,6 +26,7 @@ static func correr(arbol: SceneTree) -> PackedStringArray:
 	await _probar_caida_y_alineacion(arbol, a)
 	await _probar_caminata(arbol, a)
 	await _probar_paso_por_el_polo_sur(arbol, a)
+	await _probar_aceleracion_y_giro(arbol, a)
 	await _probar_salto(arbol, a)
 	await _probar_reubicacion(arbol, a)
 	return a.fallas
@@ -172,13 +174,20 @@ static func _probar_salto(arbol: SceneTree, a: Afirmaciones) -> void:
 	Input.action_release("jump")
 
 	var maxima: float = 0.0
+	# Ya pasaron 19 frames en el aire desde el despegue.
+	var frames_hasta_la_cima: int = 19
+	var frames_en_el_aire: int = 19
 	var subio_de_nuevo: bool = false
 	var anterior: float = _altura(jugador) - piso
 	var bajando: bool = false
 	for _i: int in range(int(1.5 * FRAMES_POR_SEGUNDO)):
 		await arbol.physics_frame
 		var altura: float = _altura(jugador) - piso
-		maxima = maxf(maxima, altura)
+		if not jugador.is_on_floor():
+			frames_en_el_aire += 1
+		if altura > maxima:
+			maxima = altura
+			frames_hasta_la_cima = frames_en_el_aire
 		if bajando and altura > anterior + 0.001:
 			subio_de_nuevo = true
 		bajando = bajando or altura < anterior
@@ -188,6 +197,8 @@ static func _probar_salto(arbol: SceneTree, a: Afirmaciones) -> void:
 	a.cerca(maxima, esperada, 0.25, "RF-04 CA1: altura del salto")
 	a.verdadero(maxima > ALTURA_DEL_TECHO, "RF-04 CA3: el salto (%.2f m) no alcanza los techos" % maxima)
 	a.verdadero(not subio_de_nuevo, "RF-04 CA2: hubo un segundo impulso en el aire")
+	var bajada: int = frames_en_el_aire - frames_hasta_la_cima
+	a.verdadero(bajada < frames_hasta_la_cima, "RF-04 CA6: la bajada (%d frames) no es más rápida que la subida (%d)" % [bajada, frames_hasta_la_cima])
 	a.verdadero(jugador.is_on_floor(), "RF-04 CA1: no volvió a caer al planeta")
 	await _descargar(arbol, escena)
 
@@ -205,3 +216,53 @@ static func _probar_reubicacion(arbol: SceneTree, a: Afirmaciones) -> void:
 	await _avanzar(arbol, escena, 2)
 	a.verdadero(jugador.global_position.distance_to(punto_seguro) < 0.5, "RNF-13: no se reubicó al atravesar el suelo")
 	await _descargar(arbol, escena)
+
+
+## Ángulo entre dos direcciones sobre el plano tangente en la posición del
+## jugador, en grados.
+static func _desvio(jugador: Jugador, a: Vector3, b: Vector3) -> float:
+	var arriba: Vector3 = GeometriaEsferica.arriba_en(jugador.global_position, Planeta.CENTRO)
+	return rad_to_deg(GeometriaEsferica.angulo_en_plano(a, b, arriba))
+
+
+## RF-03 CA3 a CA5: arranque progresivo, media vuelta progresiva y el
+## frente hacia donde camina.
+static func _probar_aceleracion_y_giro(arbol: SceneTree, a: Afirmaciones) -> void:
+	var escena: Node3D = await _cargar(arbol)
+	var jugador: Jugador = escena.get_node("Jugador")
+	await _avanzar(arbol, escena, FRAMES_POR_SEGUNDO)
+
+	Input.action_press("move_forward")
+	await _avanzar(arbol, escena, 1)
+	var primera: float = jugador.rapidez()
+	a.verdadero(primera > 0.0 and primera < Jugador.VELOCIDAD, "RF-03 CA3: en el primer frame va a %.2f m/s" % primera)
+	var frames_hasta_el_maximo: int = 1
+	while jugador.rapidez() < 0.95 * Jugador.VELOCIDAD and frames_hasta_el_maximo < FRAMES_POR_SEGUNDO:
+		await _avanzar(arbol, escena, 1)
+		frames_hasta_el_maximo += 1
+	a.verdadero(frames_hasta_el_maximo <= int(0.3 * FRAMES_POR_SEGUNDO), "RF-03 CA3: tardó %d frames en llegar al 95 %% de la velocidad" % frames_hasta_el_maximo)
+	await _avanzar(arbol, escena, 20)
+	var desvio: float = _desvio(jugador, jugador.mirada(), jugador.velocity)
+	a.verdadero(desvio < 10.0, "RF-03 CA5: caminando con W el frente se desvía %.1f°" % desvio)
+
+	# Media vuelta: de W a S. El giro termina cuando el frente queda a menos
+	# de 10° de la nueva dirección de movimiento.
+	var hacia_atras: Vector3 = -jugador.mirada()
+	Input.action_release("move_forward")
+	Input.action_press("move_back")
+	var frames_de_giro: int = 0
+	while _desvio(jugador, jugador.mirada(), hacia_atras) >= 10.0 and frames_de_giro < FRAMES_POR_SEGUNDO:
+		await _avanzar(arbol, escena, 1)
+		frames_de_giro += 1
+	a.verdadero(frames_de_giro > 1, "RF-03 CA4: la media vuelta fue instantánea")
+	a.verdadero(frames_de_giro <= int(0.3 * FRAMES_POR_SEGUNDO), "RF-03 CA4: la media vuelta tardó %d frames" % frames_de_giro)
+	await _avanzar(arbol, escena, 20)
+	desvio = _desvio(jugador, jugador.mirada(), jugador.velocity)
+	a.verdadero(desvio < 10.0, "RF-03 CA5: caminando con S el frente se desvía %.1f°" % desvio)
+
+	var mirada: Vector3 = jugador.mirada()
+	Input.action_release("move_back")
+	await _avanzar(arbol, escena, 30)
+	a.verdadero(_desvio(jugador, jugador.mirada(), mirada) < 1.0, "RF-03 CA5: al detenerse cambió de orientación")
+	await _descargar(arbol, escena)
+
