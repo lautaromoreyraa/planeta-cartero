@@ -2,7 +2,8 @@ extends SceneTree
 
 ## Test de integración del hito 3: recorre una partida entera simulando el
 ## teclado (nueva partida con tutorial, las 4 cartas, entregas con un error,
-## candado con un error, carta final y pausa) (RF-07, RF-09 a RF-21, RF-26,
+## candado con un error, carta final y pausa) y después la retoma desde el
+## guardado con la pantalla de inicio (RF-07, RF-08, RF-09 a RF-21, RF-26,
 ## RNF-12).
 ## Los textos esperados salen del config activo, así sirve también con el
 ## contenido real. Corre en tiempo real (unos 15 s).
@@ -10,6 +11,7 @@ extends SceneTree
 
 const Afirmaciones := preload("res://tests/afirmaciones.gd")
 const ESCENA_PRINCIPAL: PackedScene = preload("res://scenes/principal.tscn")
+const ESCENA_DE_INICIO: PackedScene = preload("res://scenes/pantalla_de_inicio.tscn")
 const RUTA_DE_PRUEBA: String = "user://test_recorrido.json"
 ## Frames para que el jugador se apoye y el detector elija el objetivo.
 const FRAMES_PARA_ASENTARSE: int = 20
@@ -28,6 +30,7 @@ static func correr(arbol: SceneTree) -> PackedStringArray:
 	var config: Configuracion = Configuracion.cargar()
 	Guardado.borrar(RUTA_DE_PRUEBA)
 	await _probar_partida_nueva(arbol, a, config)
+	await _probar_continuar(arbol, a, config)
 	Guardado.borrar(RUTA_DE_PRUEBA)
 	return a.fallas
 
@@ -183,6 +186,36 @@ static func _abrir_candado(arbol: SceneTree, a: Afirmaciones, escena: Principal,
 	a.verdadero(not oficina.has_node("Puerta"), "RF-19 CA2: el código correcto no abrió la puerta")
 	var guardado: EstadoDePartida = Guardado.leer(RUTA_DE_PRUEBA, config.ids_de_cartas(), Configuracion.CANTIDAD_DE_CASAS)
 	a.verdadero(guardado != null and guardado.candado_abierto, "RF-19 CA2: abrir el candado no guardó")
+
+
+## RF-21 CA2 y CA3: la pantalla de inicio ofrece «Continuar» y restaura el
+## último checkpoint; desde ahí se llega al final (RNF-12 CA3).
+static func _probar_continuar(arbol: SceneTree, a: Afirmaciones, config: Configuracion) -> void:
+	var inicio: PantallaDeInicio = ESCENA_DE_INICIO.instantiate()
+	inicio.ruta_de_guardado = RUTA_DE_PRUEBA
+	arbol.root.add_child(inicio)
+	arbol.current_scene = inicio
+	await _avanzar(arbol, 5)
+	var opciones: Node = inicio.get_node("Centro/Contenido/Opciones")
+	a.verdadero(opciones.get_child_count() == 2, "RF-21 CA2: con guardado hay %d opciones" % opciones.get_child_count())
+	a.verdadero((inicio.get_node("Centro/Contenido/Titulo") as Label).text == config.texto("inicio.titulo", ""), "RF-08 CA1: el título no sale del config")
+	await _accion(arbol, &"aceptar")
+	await _avanzar(arbol, 10)
+
+	var escena: Principal = arbol.current_scene as Principal
+	a.verdadero(escena != null, "RF-21 CA3: «Continuar» no abrió el juego")
+	if escena == null:
+		return
+	a.verdadero(not _dialogo_abierto(escena), "RF-09 CA4: al continuar se mostró el tutorial")
+	a.verdadero(escena.get_node("Cartas").get_child_count() == 0, "RF-21 CA3: volvieron cartas al planeta")
+	var codigo_hud: Label = escena.get_node("Hud/Lineas/Codigo")
+	a.verdadero(codigo_hud.visible and codigo_hud.text.contains(" ".join(config.codigo().split(""))), "RF-26 CA4: al continuar el HUD no muestra el código")
+	var oficina: Oficina = escena.get_node("Oficina")
+	a.verdadero(not oficina.has_node("Puerta"), "RF-18 CA3: al continuar la puerta volvió a cerrarse")
+	await _ir_a(arbol, escena, oficina.get_node("CartaFinal/Interactuable"), 0.05)
+	await _accion(arbol, &"interact")
+	a.verdadero(_texto_del_dialogo(escena) == config.texto("final.mensaje", ""), "RNF-12 CA3: al continuar no se llega a la carta final")
+	await _descargar(arbol, escena)
 
 
 static func _usar_buzon(arbol: SceneTree, escena: Principal, id: String) -> void:
