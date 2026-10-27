@@ -28,6 +28,13 @@ function Find-Godot {
     return $null
 }
 
+# El contenido real vive en data/config.local.json, fuera de git. Sin ese
+# archivo el ejecutable sale igual, pero con los placeholders del repo: se
+# avisa para no entregar por error un regalo vacio (RNF-06).
+if (-not (Test-Path (Join-Path $raiz 'data\config.local.json'))) {
+    Write-Warning 'No existe data/config.local.json: el .exe va a salir con los textos de placeholder de data/config.json.'
+}
+
 $godot = Find-Godot
 if ($null -eq $godot) {
     Write-Error 'No se encontro Godot en el PATH ni en C:\Godot.'
