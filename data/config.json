@@ -1,0 +1,65 @@
+{
+  "inicio": {
+    "titulo": "¡Feliz cumpleaños, [NOMBRE]!",
+    "subtitulo": "[SUBTÍTULO]",
+    "opcion_continuar": "Continuar",
+    "opcion_nueva_partida": "Nueva partida",
+    "indicacion": "Flechas para elegir, Enter para aceptar, Esc para salir",
+    "tutorial": [
+      "WASD o flechas: moverte",
+      "Espacio: saltar",
+      "E: interactuar",
+      "Esc: pausa"
+    ]
+  },
+  "pausa": {
+    "titulo": "Pausa",
+    "continuar": "Continuar",
+    "salir": "Salir"
+  },
+  "hud": {
+    "formato_cartas": "Cartas: {n}/4",
+    "formato_codigo": "Código: {codigo}",
+    "digito_oculto": "_",
+    "indicador_interaccion": "E"
+  },
+  "recoleccion": {
+    "cartas": [
+      { "id": "carta_1", "texto_al_recoger": "[TEXTO]" },
+      { "id": "carta_2", "texto_al_recoger": "[TEXTO]" },
+      { "id": "carta_3", "texto_al_recoger": "[TEXTO]" },
+      { "id": "carta_4", "texto_al_recoger": "[TEXTO]" }
+    ]
+  },
+  "entrega": {
+    "casas": [
+      { "id": "casa_a", "rotulo": "[NOMBRE CASA A]" },
+      { "id": "casa_b", "rotulo": "[NOMBRE CASA B]" },
+      { "id": "casa_c", "rotulo": "[NOMBRE CASA C]" },
+      { "id": "casa_d", "rotulo": "[NOMBRE CASA D]" }
+    ],
+    "pista": "[PISTA DEL ORDEN]",
+    "orden": ["casa_c", "casa_a", "casa_d", "casa_b"],
+    "recuerdos": [
+      { "texto": "[RECUERDO 1]", "imagen": "res://assets/personal/recuerdo_1.png" },
+      { "texto": "[RECUERDO 2]", "imagen": "" },
+      { "texto": "[RECUERDO 3]", "imagen": "res://assets/personal/recuerdo_3.png" },
+      { "texto": "[RECUERDO 4]", "imagen": "" }
+    ],
+    "formato_digito": "El dígito {posicion} del código es {digito}",
+    "aviso_error": "[AVISO AMABLE AL EQUIVOCARSE]",
+    "sin_cartas": "[AVISO SIN CARTAS]"
+  },
+  "oficina": {
+    "codigo": "0000",
+    "aviso_cerrada": "[AVISO SI TODAVÍA NO SE PUEDE ABRIR]",
+    "aviso_error": "[AVISO CÓDIGO INCORRECTO]"
+  },
+  "final": {
+    "mensaje": "[MENSAJE DE LAUTARO]",
+    "imagen": "res://assets/personal/foto_final.png"
+  },
+  "audio": {
+    "musica_final": ""
+  }
+}
