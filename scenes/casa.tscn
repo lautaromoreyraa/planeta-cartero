@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/objeto_en_superficie.gd" id="1_objeto"]
+
+[sub_resource type="StandardMaterial3D" id="Material_paredes"]
+albedo_color = Color(1, 0.94, 0.76, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_paredes"]
+material = SubResource("Material_paredes")
+size = Vector3(2, 1.6, 2)
+
+[sub_resource type="StandardMaterial3D" id="Material_techo"]
+albedo_color = Color(0.93, 0.6, 0.6, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_techo"]
+material = SubResource("Material_techo")
+size = Vector3(2.2, 0.15, 2.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_casa"]
+size = Vector3(2.2, 1.75, 2.2)
+
+[node name="Casa" type="StaticBody3D"]
+script = ExtResource("1_objeto")
+
+[node name="Paredes" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mesh = SubResource("BoxMesh_paredes")
+
+[node name="Techo" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.575, 0)
+mesh = SubResource("BoxMesh_techo")
+
+[node name="Colision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775, 0)
+shape = SubResource("BoxShape3D_casa")

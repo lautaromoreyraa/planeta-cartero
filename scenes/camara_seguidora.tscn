@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/camara_seguidora.gd" id="1_camara"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_brazo"]
+radius = 0.3
+
+[node name="CamaraSeguidora" type="Node3D"]
+script = ExtResource("1_camara")
+
+[node name="Brazo" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.906308, -0.422618, 0, 0.422618, 0.906308, 0, 1.2, 0)
+shape = SubResource("SphereShape3D_brazo")
+spring_length = 6.0
+
+[node name="Camara" type="Camera3D" parent="."]
+current = true
+fov = 65.0
+
+[node name="Sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, 0, 0, 0)
+light_color = Color(1, 0.96, 0.9, 1)
+light_energy = 0.9
+shadow_enabled = true
+shadow_blur = 2.0
+directional_shadow_max_distance = 40.0
