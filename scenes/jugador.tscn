@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/jugador.gd" id="1_jugador"]
+[ext_resource type="Script" path="res://scripts/detector_de_interaccion.gd" id="2_detector"]
 
 [sub_resource type="StandardMaterial3D" id="Material_cuerpo"]
 albedo_color = Color(0.98, 0.71, 0.76, 1)
@@ -38,3 +39,7 @@ mesh = SubResource("BoxMesh_visera")
 [node name="Colision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 shape = SubResource("CapsuleShape3D_cuerpo")
+
+[node name="DetectorDeInteraccion" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+script = ExtResource("2_detector")

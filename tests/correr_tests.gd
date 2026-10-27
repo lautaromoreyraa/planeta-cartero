@@ -10,6 +10,10 @@ const PRUEBAS: Array[String] = [
 	"res://tests/test_geometria_esferica.gd",
 	"res://tests/test_planeta.gd",
 	"res://tests/test_jugador_en_planeta.gd",
+	"res://tests/test_configuracion.gd",
+	"res://tests/test_seleccion_de_interactuable.gd",
+	"res://tests/test_inventario_de_cartas.gd",
+	"res://tests/test_cartas_en_escena.gd",
 ]
 
 

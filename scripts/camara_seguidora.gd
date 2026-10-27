@@ -37,6 +37,12 @@ var _distancia: float
 
 
 func _ready() -> void:
+	# Sin objetivo no hay a quién seguir: se avisa con un mensaje claro en vez
+	# de dejar que falle más abajo al pedirle el RID a un nulo.
+	if objetivo == null:
+		push_error("CamaraSeguidora: falta asignar «objetivo» (el Jugador) en la escena.")
+		set_physics_process(false)
+		return
 	# El brazo no tiene que chocar con el propio personaje.
 	_brazo.add_excluded_object(objetivo.get_rid())
 	global_transform = objetivo.global_transform

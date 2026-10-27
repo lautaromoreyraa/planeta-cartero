@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/principal.gd" id="1_principal"]
 [ext_resource type="PackedScene" path="res://scenes/casa.tscn" id="2_casa"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/planeta.tscn" id="5_planeta"]
 [ext_resource type="PackedScene" path="res://scenes/jugador.tscn" id="6_jugador"]
 [ext_resource type="PackedScene" path="res://scenes/camara_seguidora.tscn" id="7_camara"]
+[ext_resource type="PackedScene" path="res://scenes/carta.tscn" id="8_carta"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_hud"]
 
 [sub_resource type="Environment" id="Environment_pastel"]
 background_mode = 1
@@ -77,3 +79,29 @@ longitud = -60.0
 [node name="Plataforma2" parent="Objetos" instance=ExtResource("4_plataforma")]
 latitud = -10.0
 longitud = 45.0
+
+[node name="Cartas" type="Node3D" parent="."]
+
+[node name="Carta1" parent="Cartas" instance=ExtResource("8_carta")]
+id = "carta_1"
+latitud = 70.0
+longitud = 20.0
+
+[node name="Carta2" parent="Cartas" instance=ExtResource("8_carta")]
+id = "carta_2"
+latitud = 30.0
+longitud = 0.0
+altura = 2.0
+
+[node name="Carta3" parent="Cartas" instance=ExtResource("8_carta")]
+id = "carta_3"
+latitud = 50.0
+longitud = -60.0
+altura = 1.75
+
+[node name="Carta4" parent="Cartas" instance=ExtResource("8_carta")]
+id = "carta_4"
+latitud = -30.0
+longitud = 150.0
+
+[node name="Hud" parent="." instance=ExtResource("9_hud")]

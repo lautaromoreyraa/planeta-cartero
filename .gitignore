@@ -16,3 +16,10 @@ MEMORY.md
 docs/
 *.md
 !README.md
+
+# Contenido personal: el repo es público y esto vive sólo en la PC de
+# Lautaro (RNF-06). Se ignora el contenido de assets/personal pero no la
+# carpeta, para que el proyecto la encuentre al clonarlo.
+data/config.local.json
+assets/personal/*
+!assets/personal/.gitkeep
