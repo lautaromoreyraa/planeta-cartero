@@ -1,0 +1,113 @@
+# Exporta el ejecutable de Windows y lo publica como Release al pushear un
+# tag v*. Los tags v0.x salen como prerelease; v1.0.0 en adelante, normales.
+#
+# Godot se baja de los releases oficiales de godotengine/godot en la misma
+# versión que se usa en local, y cada archivo se verifica contra su SHA-512
+# publicado antes de usarlo.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7.2"
+  GODOT_SHA512_LINUX: "9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65"
+  GODOT_SHA512_TEMPLATES: "ca4d71c4d7b81dfc15d1a98baa07534aa95b03fdda78a0075b06672e1648d2e5f40980c9adc28d23e1b92e732ee7bf3461997aa804af74ec2fcd7a93ccb84079"
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      # Sólo este job escribe: crea el Release y sube el .exe.
+      contents: write
+    steps:
+      - name: Clonar el repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Instalar Godot y la plantilla de Windows
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          editor="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          plantillas="Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o "${editor}.zip" "${base}/${editor}.zip"
+          curl -fsSL -o "${plantillas}" "${base}/${plantillas}"
+          echo "${GODOT_SHA512_LINUX}  ${editor}.zip" | sha512sum -c -
+          echo "${GODOT_SHA512_TEMPLATES}  ${plantillas}" | sha512sum -c -
+
+          unzip -q "${editor}.zip"
+          mkdir -p "$HOME/.local/bin"
+          mv "${editor}" "$HOME/.local/bin/godot"
+          chmod +x "$HOME/.local/bin/godot"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          # Sólo hace falta la plantilla release de Windows x86_64; el
+          # paquete completo pesa más de 1 GB.
+          destino="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$destino"
+          unzip -q -j "${plantillas}" \
+            templates/windows_release_x86_64.exe \
+            templates/version.txt \
+            -d "$destino"
+          rm -f "${editor}.zip" "${plantillas}"
+
+      - name: Verificar la versión de Godot
+        run: |
+          set -euo pipefail
+          version="$(godot --headless --version)"
+          echo "$version"
+          case "$version" in
+            "${GODOT_VERSION}.stable."*) ;;
+            *) echo "Se esperaba Godot ${GODOT_VERSION}.stable" >&2; exit 1 ;;
+          esac
+
+      - name: Importar el proyecto
+        # Sin .godot/ el proyecto no conoce las clases globales ni los
+        # recursos importados; el import no devuelve error por sí solo, así
+        # que se verifica que haya generado la caché de clases.
+        run: |
+          set -euo pipefail
+          godot --headless --editor --quit
+          test -f .godot/global_script_class_cache.cfg
+
+      - name: Correr los tests
+        run: godot --headless --script res://tests/correr_tests.gd
+
+      - name: Exportar el ejecutable
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --export-release "Windows Desktop" build/PlanetaCartero.exe
+          test -s build/PlanetaCartero.exe
+          ls -lh build/PlanetaCartero.exe
+
+      - name: Crear el Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          opciones=()
+          case "$TAG" in
+            v0.*) opciones+=(--prerelease) ;;
+          esac
+          gh release create "$TAG" build/PlanetaCartero.exe \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Planeta Cartero $TAG" \
+            --notes-from-tag \
+            --verify-tag \
+            "${opciones[@]}"
