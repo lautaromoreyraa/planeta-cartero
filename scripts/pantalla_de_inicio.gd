@@ -14,7 +14,7 @@ const ESCENA_DEL_JUEGO: PackedScene = preload("res://scenes/principal.tscn")
 const TITULO_POR_DEFECTO: String = "¡Feliz cumpleaños!"
 const CONTINUAR_POR_DEFECTO: String = "Continuar"
 const NUEVA_PARTIDA_POR_DEFECTO: String = "Nueva partida"
-const INDICACION_POR_DEFECTO: String = "Flechas para elegir, Enter para aceptar, Esc para salir"
+const INDICACION_POR_DEFECTO: String = "Flechas para elegir, Enter o clic para aceptar, Esc para salir"
 
 ## Archivo de guardado; los tests lo cambian antes de agregar la escena.
 var ruta_de_guardado: String = Guardado.RUTA

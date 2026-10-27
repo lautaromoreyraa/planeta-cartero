@@ -13,7 +13,7 @@ extends CanvasLayer
 const TITULO_POR_DEFECTO: String = "Pausa"
 const CONTINUAR_POR_DEFECTO: String = "Continuar"
 const SALIR_POR_DEFECTO: String = "Salir"
-const INDICACION_POR_DEFECTO: String = "Flechas para elegir, Enter para aceptar"
+const INDICACION_POR_DEFECTO: String = "Flechas para elegir, Enter o clic para aceptar"
 
 @onready var _titulo: Label = $Centro/Panel/Contenido/Titulo
 @onready var _opciones: MenuDeOpciones = $Centro/Panel/Contenido/Opciones
@@ -50,9 +50,10 @@ func _unhandled_input(evento: InputEvent) -> void:
 func _abrir() -> void:
 	_pausa_previa = get_tree().paused
 	get_tree().paused = true
+	# Visible antes de elegir la primera opción: sólo así puede tomar el foco.
+	visible = true
 	_opciones.seleccionar(0)
 	_opciones.activo = true
-	visible = true
 
 
 func _cerrar() -> void:

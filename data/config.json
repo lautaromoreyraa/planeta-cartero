@@ -4,7 +4,7 @@
     "subtitulo": "[SUBTÍTULO]",
     "opcion_continuar": "Continuar",
     "opcion_nueva_partida": "Nueva partida",
-    "indicacion": "Flechas o W/S para elegir, Enter para aceptar, Esc para salir",
+    "indicacion": "Flechas o W/S para elegir, Enter o clic para aceptar, Esc para salir",
     "tutorial": [
       "WASD o flechas: moverte",
       "Espacio: saltar",
@@ -16,7 +16,7 @@
     "titulo": "Pausa",
     "continuar": "Continuar",
     "salir": "Salir",
-    "indicacion": "Flechas o W/S para elegir, Enter para aceptar"
+    "indicacion": "Flechas o W/S para elegir, Enter o clic para aceptar"
   },
   "dialogo": {
     "indicacion": "Enter o E para cerrar · Flechas para desplazar el texto"

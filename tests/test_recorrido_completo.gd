@@ -99,6 +99,12 @@ static func _probar_pausa(arbol: SceneTree, a: Afirmaciones, escena: Principal) 
 	await _accion(arbol, &"pause")
 	await _accion(arbol, &"pause")
 	a.verdadero(not _menu_de_pausa(escena).visible and not arbol.paused, "RF-07 CA4: Esc otra vez no cerró la pausa")
+	# Un clic en «Continuar» llega como `pressed` del botón (RF-28 CA7).
+	await _accion(arbol, &"pause")
+	var continuar: Button = _menu_de_pausa(escena).get_node("Centro/Panel/Contenido/Opciones").get_child(0)
+	continuar.pressed.emit()
+	await _avanzar(arbol, 2)
+	a.verdadero(not _menu_de_pausa(escena).visible and not arbol.paused, "RF-07 CA4: el clic en «Continuar» no cerró la pausa")
 
 
 ## RF-11 y RF-21 CA1: cada carta pasa al inventario y guarda.
