@@ -1,0 +1,18 @@
+# Godot
+.godot/
+*.import.tmp
+*.translation
+/android/
+
+# Salida del export
+build/
+
+# Documentación de trabajo y de asistentes: vive en disco, no en el repo
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+.claude/
+.cursorrules
+docs/
+*.md
+!README.md

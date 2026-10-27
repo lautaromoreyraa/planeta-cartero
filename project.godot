@@ -1,0 +1,8 @@
+; Engine configuration file.
+; Godot completa las secciones restantes al abrir el proyecto.
+
+config_version=5
+
+[application]
+
+config/name="Planeta Cartero"
