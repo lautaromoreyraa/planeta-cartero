@@ -1,0 +1,36 @@
+[gd_resource type="Theme" load_steps=3 format=3]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 48.0
+content_margin_top = 40.0
+content_margin_right = 48.0
+content_margin_bottom = 40.0
+bg_color = Color(1, 0.97, 0.92, 0.97)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.93, 0.6, 0.6, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opcion_elegida"]
+content_margin_left = 24.0
+content_margin_top = 6.0
+content_margin_right = 24.0
+content_margin_bottom = 6.0
+bg_color = Color(0.93, 0.6, 0.6, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[resource]
+default_font_size = 32
+Label/colors/font_color = Color(0.2, 0.18, 0.3, 1)
+OpcionElegida/base_type = &"Label"
+OpcionElegida/colors/font_color = Color(1, 1, 1, 1)
+OpcionElegida/styles/normal = SubResource("StyleBoxFlat_opcion_elegida")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
