@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/objeto_en_superficie.gd" id="1_objeto"]
+
+[sub_resource type="StandardMaterial3D" id="Material_caja"]
+albedo_color = Color(0.8, 0.72, 0.93, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_caja"]
+material = SubResource("Material_caja")
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_caja"]
+size = Vector3(1, 1, 1)
+
+[node name="Caja" type="StaticBody3D"]
+script = ExtResource("1_objeto")
+
+[node name="Malla" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("BoxMesh_caja")
+
+[node name="Colision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("BoxShape3D_caja")

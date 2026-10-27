@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/planeta.gd" id="1_planeta"]
+
+[sub_resource type="StandardMaterial3D" id="Material_pasto"]
+albedo_color = Color(0.67, 0.87, 0.69, 1)
+roughness = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_planeta"]
+material = SubResource("Material_pasto")
+radius = 10.0
+height = 20.0
+radial_segments = 48
+rings = 24
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_planeta"]
+radius = 10.0
+
+[node name="Planeta" type="StaticBody3D"]
+script = ExtResource("1_planeta")
+
+[node name="Malla" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_planeta")
+
+[node name="Colision" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_planeta")
