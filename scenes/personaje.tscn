@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/personaje.gd" id="1_personaje"]
+[ext_resource type="PackedScene" uid="uid://dde77hofoihnf" path="res://assets/kenney/mini-characters/character-female-b.glb" id="2_modelo"]
+
+[node name="Personaje" type="Node3D"]
+script = ExtResource("1_personaje")
+
+[node name="Modelo" parent="." instance=ExtResource("2_modelo")]
+transform = Transform3D(-2.2, 0, 0, 0, 2.2, 0, 0, 0, -2.2, 0, 0, 0)

@@ -12,6 +12,7 @@ extends Node3D
 
 ## Textos por defecto si falta la clave en el config (RF-22 CA2).
 const TUTORIAL_POR_DEFECTO: PackedStringArray = [
+	"Mouse: mirar alrededor",
 	"WASD o flechas: moverte",
 	"Espacio: saltar",
 	"E: interactuar",
@@ -33,6 +34,8 @@ var mostrar_tutorial: bool = false
 var ruta_de_guardado: String = ""
 
 @onready var _hud: Hud = $Hud
+@onready var _jugador: Jugador = $Jugador
+@onready var _control_del_cursor: ControlDelCursor = $ControlDelCursor
 @onready var _detector: DetectorDeInteraccion = $Jugador/DetectorDeInteraccion
 @onready var _cartas: Node3D = $Cartas
 @onready var _casas: Node3D = $Casas
@@ -67,6 +70,7 @@ func _ready() -> void:
 	_inventario.carta_recogida.connect(_al_juntar_carta)
 	_inventario.cantidad_cambiada.connect(_actualizar_hud.unbind(1))
 	_detector.objetivo_cambiado.connect(_hud.mostrar_objetivo)
+	_control_del_cursor.juego_en_curso_cambiado.connect(_hud.mostrar_guia)
 	for carta: Carta in _cartas_en_el_planeta():
 		carta.recogida.connect(_al_recoger_carta)
 	_cartel.leido.connect(_al_leer_el_cartel)
@@ -78,6 +82,29 @@ func _ready() -> void:
 	_actualizar_buzones()
 	if mostrar_tutorial:
 		_dialogo.mostrar("\n".join(config.tutorial(TUTORIAL_POR_DEFECTO)))
+
+
+## La guía se reorienta en cada frame de física; con el juego en pausa no
+## corre, igual que el mundo (RF-30).
+func _physics_process(_delta: float) -> void:
+	var camara: Camera3D = get_viewport().get_camera_3d()
+	if camara == null:
+		return
+	var cartas: PackedVector3Array = PackedVector3Array()
+	for carta: Carta in _cartas_en_el_planeta():
+		cartas.append(carta.global_position)
+	var ids: PackedStringArray = PackedStringArray()
+	var buzones: PackedVector3Array = PackedVector3Array()
+	for nodo: Node in _casas.get_children():
+		var casa: CasaConBuzon = nodo as CasaConBuzon
+		ids.append(casa.id)
+		buzones.append(casa.posicion_del_buzon())
+	var objetivo: Vector3 = GuiaDeObjetivo.elegir(
+		_jugador.global_position, cartas, ids, buzones, _secuencia,
+		_oficina.posicion_de_la_puerta(), _oficina.posicion_de_la_carta_final(), _candado_abierto
+	)
+	var arriba: Vector3 = GeometriaEsferica.arriba_en(_jugador.global_position, Planeta.CENTRO)
+	_hud.orientar_guia(GeometriaEsferica.angulo_en_pantalla(_jugador.global_position, objetivo, arriba, camara.global_basis))
 
 
 func _configurar_casas() -> void:
@@ -130,6 +157,7 @@ func _actualizar_buzones() -> void:
 func _al_recoger_carta(carta: Carta) -> void:
 	if _inventario.recoger(carta.id):
 		carta.retirar()
+		_jugador.hacer_gesto(Personaje.Gesto.RECOGER)
 
 
 ## Recoger una carta es un checkpoint (RF-11 CA3).
@@ -141,6 +169,7 @@ func _al_juntar_carta(id: String) -> void:
 
 
 func _al_usar_un_buzon(casa: CasaConBuzon) -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	match _secuencia.entregar(casa.id, _cartas_en_mano()):
 		SecuenciaDeEntrega.Resultado.CORRECTA:
 			_mostrar_recuerdo(_secuencia.entregas())
@@ -166,11 +195,13 @@ func _mostrar_recuerdo(numero: int) -> void:
 
 
 func _al_leer_el_cartel() -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	_dialogo.mostrar(config.texto("entrega.pista", PISTA_POR_DEFECTO))
 
 
 ## La puerta se habilita al completar la zona 2 (RF-18).
 func _al_usar_la_puerta() -> void:
+	_jugador.hacer_gesto(Personaje.Gesto.INTERACTUAR)
 	if _secuencia.completa():
 		_panel_del_candado.abrir()
 	else:
@@ -181,6 +212,7 @@ func _al_usar_la_puerta() -> void:
 func _al_abrir_el_candado() -> void:
 	_candado_abierto = true
 	_oficina.abrir()
+	_jugador.hacer_gesto(Personaje.Gesto.FESTEJAR)
 	_guardar()
 
 

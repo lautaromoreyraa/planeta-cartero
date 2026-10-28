@@ -67,6 +67,20 @@ static func angulo_en_plano(a: Vector3, b: Vector3, eje: Vector3) -> float:
 	return pa.angle_to(pb)
 
 
+## Gira el vector unitario `actual` hacia `objetivo` como mucho
+## `angulo_maximo` radianes. Acota el giro del «arriba» de la cámara cuando
+## el personaje se reubica de golpe (RNF-14).
+static func girar_vector_hacia(actual: Vector3, objetivo: Vector3, angulo_maximo: float) -> Vector3:
+	var angulo: float = actual.angle_to(objetivo)
+	if angulo <= angulo_maximo:
+		return objetivo.normalized()
+	var eje: Vector3 = actual.cross(objetivo)
+	if eje.length_squared() < EPSILON:
+		# Opuestos: cualquier eje perpendicular sirve para empezar a girar.
+		eje = actual.cross(Vector3.RIGHT if absf(actual.x) < 0.9 else Vector3.FORWARD)
+	return actual.rotated(eje.normalized(), angulo_maximo).normalized()
+
+
 ## Rota `actual` hacia `objetivo` sin superar `angulo_maximo` radianes.
 ## Es el límite de velocidad de giro de la cámara (RNF-14).
 static func rotar_hacia(actual: Quaternion, objetivo: Quaternion, angulo_maximo: float) -> Quaternion:
@@ -90,6 +104,21 @@ static func direccion_relativa(entrada: Vector2, base_camara: Basis, arriba: Vec
 	var derecha: Vector3 = adelante.cross(arriba.normalized())
 	var direccion: Vector3 = derecha * entrada.x - adelante * entrada.y
 	return direccion.limit_length(1.0)
+
+
+## Ángulo en radianes con el que una flecha de pantalla apunta desde
+## `desde` hacia `hacia`, según la vista de la cámara (RF-30 CA2): 0 es hacia
+## arriba de la pantalla (lo que W aleja de la cámara) y crece en sentido
+## horario, como `Control.rotation`. Se mide sobre el plano tangente en
+## `desde`, así un objetivo del otro lado del planeta apunta por el camino
+## más corto sobre la superficie.
+static func angulo_en_pantalla(desde: Vector3, hacia: Vector3, arriba: Vector3, base_camara: Basis) -> float:
+	var direccion: Vector3 = proyectar_en_plano(hacia - desde, arriba)
+	var adelante: Vector3 = direccion_relativa(Vector2(0.0, -1.0), base_camara, arriba)
+	if direccion.length_squared() < EPSILON or adelante.length_squared() < EPSILON:
+		return 0.0
+	var derecha: Vector3 = adelante.cross(arriba.normalized())
+	return atan2(direccion.dot(derecha), direccion.dot(adelante))
 
 
 ## Transform de un objeto apoyado en la superficie: origen a `distancia` del

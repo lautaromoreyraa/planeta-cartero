@@ -1,8 +1,9 @@
 extends SceneTree
 
-## Test de integración del hito 1: carga la escena principal, simula física
-## con teclas apretadas por código y mide lo que piden los criterios de
-## RF-01 a RF-05, RNF-13 y RNF-14. Corre en tiempo real (unos 12 s).
+## Test de integración del personaje y la cámara: carga la escena principal,
+## simula física con teclas y movimientos de mouse por código y mide lo que
+## piden los criterios de RF-01 a RF-05, RF-28, RNF-13 y RNF-14. Corre en
+## tiempo real (unos 30 s).
 ## Se corre solo con `godot --headless --script res://tests/test_jugador_en_planeta.gd`.
 
 const Afirmaciones := preload("res://tests/afirmaciones.gd")
@@ -25,8 +26,10 @@ static func correr(arbol: SceneTree) -> PackedStringArray:
 	await _probar_caida_y_alineacion(arbol, a)
 	await _probar_caminata(arbol, a)
 	await _probar_paso_por_el_polo_sur(arbol, a)
+	await _probar_aceleracion_y_giro(arbol, a)
 	await _probar_salto(arbol, a)
 	await _probar_reubicacion(arbol, a)
+	await _probar_camara_con_mouse(arbol, a)
 	return a.fallas
 
 
@@ -46,12 +49,14 @@ static func _descargar(arbol: SceneTree, escena: Node3D) -> void:
 	for accion: String in ["move_forward", "move_back", "move_left", "move_right", "jump"]:
 		Input.action_release(accion)
 	escena.queue_free()
+	arbol.paused = false
 	await arbol.process_frame
 
 
 ## Espera frames de física y devuelve el mayor giro de la cámara en un frame.
+## Se mide la Camera3D y no el soporte para incluir la inclinación del brazo.
 static func _avanzar(arbol: SceneTree, escena: Node3D, frames: int) -> float:
-	var camara: Node3D = escena.get_node("CamaraSeguidora")
+	var camara: Node3D = escena.get_node("CamaraSeguidora/Camara")
 	var giro_maximo: float = 0.0
 	for _i: int in range(frames):
 		var antes: Quaternion = camara.global_basis.get_rotation_quaternion()
@@ -172,13 +177,20 @@ static func _probar_salto(arbol: SceneTree, a: Afirmaciones) -> void:
 	Input.action_release("jump")
 
 	var maxima: float = 0.0
+	# Ya pasaron 19 frames en el aire desde el despegue.
+	var frames_hasta_la_cima: int = 19
+	var frames_en_el_aire: int = 19
 	var subio_de_nuevo: bool = false
 	var anterior: float = _altura(jugador) - piso
 	var bajando: bool = false
 	for _i: int in range(int(1.5 * FRAMES_POR_SEGUNDO)):
 		await arbol.physics_frame
 		var altura: float = _altura(jugador) - piso
-		maxima = maxf(maxima, altura)
+		if not jugador.is_on_floor():
+			frames_en_el_aire += 1
+		if altura > maxima:
+			maxima = altura
+			frames_hasta_la_cima = frames_en_el_aire
 		if bajando and altura > anterior + 0.001:
 			subio_de_nuevo = true
 		bajando = bajando or altura < anterior
@@ -188,6 +200,8 @@ static func _probar_salto(arbol: SceneTree, a: Afirmaciones) -> void:
 	a.cerca(maxima, esperada, 0.25, "RF-04 CA1: altura del salto")
 	a.verdadero(maxima > ALTURA_DEL_TECHO, "RF-04 CA3: el salto (%.2f m) no alcanza los techos" % maxima)
 	a.verdadero(not subio_de_nuevo, "RF-04 CA2: hubo un segundo impulso en el aire")
+	var bajada: int = frames_en_el_aire - frames_hasta_la_cima
+	a.verdadero(bajada < frames_hasta_la_cima, "RF-04 CA6: la bajada (%d frames) no es más rápida que la subida (%d)" % [bajada, frames_hasta_la_cima])
 	a.verdadero(jugador.is_on_floor(), "RF-04 CA1: no volvió a caer al planeta")
 	await _descargar(arbol, escena)
 
@@ -204,4 +218,127 @@ static func _probar_reubicacion(arbol: SceneTree, a: Afirmaciones) -> void:
 	jugador.global_position = Vector3(0, 1, 0)
 	await _avanzar(arbol, escena, 2)
 	a.verdadero(jugador.global_position.distance_to(punto_seguro) < 0.5, "RNF-13: no se reubicó al atravesar el suelo")
+	await _descargar(arbol, escena)
+
+
+## Ángulo entre dos direcciones sobre el plano tangente en la posición del
+## jugador, en grados.
+static func _desvio(jugador: Jugador, a: Vector3, b: Vector3) -> float:
+	var arriba: Vector3 = GeometriaEsferica.arriba_en(jugador.global_position, Planeta.CENTRO)
+	return rad_to_deg(GeometriaEsferica.angulo_en_plano(a, b, arriba))
+
+
+## RF-03 CA3 a CA5: arranque progresivo, media vuelta progresiva y el
+## frente hacia donde camina.
+static func _probar_aceleracion_y_giro(arbol: SceneTree, a: Afirmaciones) -> void:
+	var escena: Node3D = await _cargar(arbol)
+	var jugador: Jugador = escena.get_node("Jugador")
+	await _avanzar(arbol, escena, FRAMES_POR_SEGUNDO)
+
+	Input.action_press("move_forward")
+	await _avanzar(arbol, escena, 1)
+	var primera: float = jugador.rapidez()
+	a.verdadero(primera > 0.0 and primera < Jugador.VELOCIDAD, "RF-03 CA3: en el primer frame va a %.2f m/s" % primera)
+	var frames_hasta_el_maximo: int = 1
+	while jugador.rapidez() < 0.95 * Jugador.VELOCIDAD and frames_hasta_el_maximo < FRAMES_POR_SEGUNDO:
+		await _avanzar(arbol, escena, 1)
+		frames_hasta_el_maximo += 1
+	a.verdadero(frames_hasta_el_maximo <= int(0.3 * FRAMES_POR_SEGUNDO), "RF-03 CA3: tardó %d frames en llegar al 95 %% de la velocidad" % frames_hasta_el_maximo)
+	await _avanzar(arbol, escena, 20)
+	var desvio: float = _desvio(jugador, jugador.mirada(), jugador.velocity)
+	a.verdadero(desvio < 10.0, "RF-03 CA5: caminando con W el frente se desvía %.1f°" % desvio)
+
+	# Media vuelta: de W a S. El giro termina cuando el frente queda a menos
+	# de 10° de la nueva dirección de movimiento.
+	var hacia_atras: Vector3 = -jugador.mirada()
+	Input.action_release("move_forward")
+	Input.action_press("move_back")
+	var frames_de_giro: int = 0
+	while _desvio(jugador, jugador.mirada(), hacia_atras) >= 10.0 and frames_de_giro < FRAMES_POR_SEGUNDO:
+		await _avanzar(arbol, escena, 1)
+		frames_de_giro += 1
+	a.verdadero(frames_de_giro > 1, "RF-03 CA4: la media vuelta fue instantánea")
+	a.verdadero(frames_de_giro <= int(0.3 * FRAMES_POR_SEGUNDO), "RF-03 CA4: la media vuelta tardó %d frames" % frames_de_giro)
+	await _avanzar(arbol, escena, 20)
+	desvio = _desvio(jugador, jugador.mirada(), jugador.velocity)
+	a.verdadero(desvio < 10.0, "RF-03 CA5: caminando con S el frente se desvía %.1f°" % desvio)
+
+	var mirada: Vector3 = jugador.mirada()
+	Input.action_release("move_back")
+	await _avanzar(arbol, escena, 30)
+	a.verdadero(_desvio(jugador, jugador.mirada(), mirada) < 1.0, "RF-03 CA5: al detenerse cambió de orientación")
+	await _descargar(arbol, escena)
+
+
+static func _mover_mouse(arbol: SceneTree, relativo: Vector2) -> void:
+	var evento: InputEventMouseMotion = InputEventMouseMotion.new()
+	evento.screen_relative = relativo
+	Input.parse_input_event(evento)
+	await arbol.physics_frame
+
+
+## Inclinación de la cámara sobre el plano tangente al personaje, en grados:
+## positiva con la cámara arriba del pivote.
+static func _inclinacion(escena: Node3D) -> float:
+	var soporte: Node3D = escena.get_node("CamaraSeguidora")
+	var brazo: Node3D = escena.get_node("CamaraSeguidora/Brazo")
+	var camara: Node3D = escena.get_node("CamaraSeguidora/Camara")
+	var desde_el_pivote: Vector3 = (camara.global_position - brazo.global_position).normalized()
+	return rad_to_deg(asin(clampf(desde_el_pivote.dot(soporte.global_basis.y), -1.0, 1.0)))
+
+
+## RF-28 CA2, CA3, CA5 y CA8, RNF-14 CA1: el mouse gira la cámara sin ejes
+## invertidos, la inclinación tiene topes, la cámara no se mueve con el
+## juego en pausa y vuelve sola, despacio, sólo si el personaje camina.
+static func _probar_camara_con_mouse(arbol: SceneTree, a: Afirmaciones) -> void:
+	var escena: Node3D = await _cargar(arbol)
+	var jugador: Jugador = escena.get_node("Jugador")
+	var soporte: Node3D = escena.get_node("CamaraSeguidora")
+	var camara: Camera3D = escena.get_node("CamaraSeguidora/Camara")
+	await _avanzar(arbol, escena, 30)
+
+	var adelante: Vector3 = -soporte.global_basis.z
+	var derecha: Vector3 = soporte.global_basis.x
+	await _mover_mouse(arbol, Vector2(100, 0))
+	var nuevo: Vector3 = -soporte.global_basis.z
+	a.verdadero(nuevo.dot(derecha) > 0.1, "RF-28 CA2: mouse a la derecha no gira la vista a la derecha")
+	a.cerca(adelante.angle_to(nuevo), 100.0 * CamaraSeguidora.SENSIBILIDAD, 0.02, "RF-28 CA4: el giro no sigue la sensibilidad")
+	a.vectores_cerca(soporte.global_basis.y, GeometriaEsferica.arriba_en(jugador.global_position, Planeta.CENTRO), 0.01, "RF-28 CA2: el giro no es sobre up_direction")
+
+	var inicial: float = _inclinacion(escena)
+	await _mover_mouse(arbol, Vector2(0, -50))
+	a.verdadero(_inclinacion(escena) < inicial - 5.0, "RF-28 CA2: mouse arriba no sube la vista (%.1f° a %.1f°)" % [inicial, _inclinacion(escena)])
+	await _mover_mouse(arbol, Vector2(0, -5000))
+	await _avanzar(arbol, escena, 30)
+	a.cerca(_inclinacion(escena), rad_to_deg(CamaraSeguidora.INCLINACION_MINIMA), 1.0, "RF-28 CA3: la inclinación mínima no es un tope")
+	a.verdadero(camara.global_position.distance_to(Planeta.CENTRO) > Planeta.RADIO + 0.1, "RF-28 CA3: con la inclinación mínima la cámara queda bajo la superficie")
+	await _mover_mouse(arbol, Vector2(0, 5000))
+	await _avanzar(arbol, escena, 30)
+	var maxima: float = _inclinacion(escena)
+	a.cerca(maxima, rad_to_deg(CamaraSeguidora.INCLINACION_MAXIMA), 1.0, "RF-28 CA3: la inclinación máxima no es un tope")
+	a.verdadero(maxima < 89.0, "RF-28 CA3: la cámara se pone cenital (%.1f°)" % maxima)
+
+	# RF-28 CA8: con el juego en pausa el mouse no gira la cámara.
+	var antes: Basis = soporte.global_basis
+	arbol.paused = true
+	await _mover_mouse(arbol, Vector2(300, 200))
+	arbol.paused = false
+	await arbol.physics_frame
+	a.verdadero(soporte.global_basis.is_equal_approx(antes), "RF-28 CA8: el mouse giró la cámara con el juego en pausa")
+
+	# Con el personaje quieto la cámara no vuelve sola, aunque pase el tiempo.
+	await _avanzar(arbol, escena, int((CamaraSeguidora.ESPERA_DE_LA_VUELTA + 1.0) * FRAMES_POR_SEGUNDO))
+	a.cerca(_inclinacion(escena), maxima, 0.5, "RF-28 CA5: con el personaje quieto la cámara volvió sola")
+
+	# Caminando, no vuelve antes de la espera desde el último movimiento del
+	# mouse...
+	await _mover_mouse(arbol, Vector2(1, 0))
+	Input.action_press("move_forward")
+	await _avanzar(arbol, escena, int((CamaraSeguidora.ESPERA_DE_LA_VUELTA - 0.5) * FRAMES_POR_SEGUNDO))
+	a.cerca(_inclinacion(escena), maxima, 0.5, "RF-28 CA5: la cámara volvió antes de la espera")
+	# ...y después vuelve a la inclinación por defecto sin pasar de 180°/s.
+	var giro: float = await _avanzar(arbol, escena, int(2.5 * FRAMES_POR_SEGUNDO))
+	Input.action_release("move_forward")
+	a.cerca(_inclinacion(escena), rad_to_deg(CamaraSeguidora.INCLINACION_POR_DEFECTO), 1.0, "RF-28 CA5: la cámara no volvió a la inclinación por defecto")
+	_verificar_giro_de_camara(a, giro, "vuelta automática")
 	await _descargar(arbol, escena)

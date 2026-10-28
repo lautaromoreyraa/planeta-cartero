@@ -46,8 +46,10 @@ static func _probar_partida_nueva(arbol: SceneTree, a: Afirmaciones, config: Con
 	var tutorial: String = "\n".join(config.tutorial(PackedStringArray()))
 	a.verdadero(_dialogo_abierto(escena) and _texto_del_dialogo(escena) == tutorial, "RF-09 CA1: no se ve el tutorial al empezar")
 	a.verdadero(arbol.paused, "con el tutorial abierto el juego no está en pausa")
+	a.verdadero(not _guia_visible(escena), "RF-30 CA1: la guía se ve con el tutorial abierto")
 	await _accion(arbol, &"aceptar")
 	a.verdadero(not _dialogo_abierto(escena) and not arbol.paused, "RF-09 CA3: Enter no cerró el tutorial")
+	a.verdadero(_guia_visible(escena), "RF-30 CA1: al cerrar el tutorial no se ve la guía")
 
 	await _probar_pausa(arbol, a, escena)
 
@@ -75,6 +77,7 @@ static func _probar_partida_nueva(arbol: SceneTree, a: Afirmaciones, config: Con
 	await _ir_a(arbol, escena, oficina.get_node("CartaFinal/Interactuable"), 0.05)
 	await _accion(arbol, &"interact")
 	a.verdadero(_texto_del_dialogo(escena) == config.texto("final.mensaje", ""), "RF-20 CA1: no se ve el mensaje final")
+	a.verdadero(not _guia_visible(escena), "RF-30 CA1: la guía se ve en la carta final")
 	await _accion(arbol, &"aceptar")
 	a.verdadero(_dialogo_abierto(escena), "la carta final se cerró con Enter")
 	await _accion(arbol, &"pause")
@@ -97,8 +100,16 @@ static func _probar_pausa(arbol: SceneTree, a: Afirmaciones, escena: Principal) 
 	await _accion(arbol, &"aceptar")
 	a.verdadero(not _menu_de_pausa(escena).visible and not arbol.paused, "RF-07 CA4: «Continuar» no cerró la pausa")
 	await _accion(arbol, &"pause")
+	a.verdadero(not _guia_visible(escena), "RF-30 CA1: la guía se ve con la pausa abierta")
 	await _accion(arbol, &"pause")
 	a.verdadero(not _menu_de_pausa(escena).visible and not arbol.paused, "RF-07 CA4: Esc otra vez no cerró la pausa")
+	# Un clic en «Continuar» llega como `pressed` del botón (RF-28 CA7).
+	await _accion(arbol, &"pause")
+	var continuar: Button = _menu_de_pausa(escena).get_node("Centro/Panel/Contenido/Opciones").get_child(0)
+	continuar.pressed.emit()
+	await _avanzar(arbol, 2)
+	a.verdadero(not _menu_de_pausa(escena).visible and not arbol.paused, "RF-07 CA4: el clic en «Continuar» no cerró la pausa")
+	a.verdadero(_guia_visible(escena), "RF-30 CA1: al cerrar la pausa no se ve la guía")
 
 
 ## RF-11 y RF-21 CA1: cada carta pasa al inventario y guarda.
@@ -281,6 +292,10 @@ static func _texto_del_dialogo(escena: Principal) -> String:
 static func _texto_del_hud(escena: Principal) -> String:
 	var etiqueta: Label = escena.get_node("Hud/Lineas/Cartas")
 	return etiqueta.text
+
+
+static func _guia_visible(escena: Principal) -> bool:
+	return (escena.get_node("Hud/Guia") as Control).visible
 
 
 static func _panel_del_candado(escena: Principal) -> PanelDelCandado:

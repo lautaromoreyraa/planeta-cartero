@@ -20,6 +20,10 @@ const RUTA_LOCAL: String = "res://data/config.local.json"
 const CARPETA_DE_IMAGENES: String = "res://assets/personal/"
 const EXTENSIONES_DE_IMAGEN: PackedStringArray = ["png", "jpg", "jpeg", "webp"]
 const CANTIDAD_DE_CASAS: int = 4
+## El tutorial explica cinco acciones: mirar, moverse, saltar, interactuar y
+## pausar (RF-09 CA1). Menos líneas quiere decir que falta alguna, como la
+## del mouse en un config local copiado antes de la versión 0.3.
+const LINEAS_DEL_TUTORIAL: int = 5
 
 ## Claves de texto que el juego lee; todas obligatorias (sección 5 del SRS).
 const CLAVES_DE_TEXTO: PackedStringArray = [
@@ -130,7 +134,8 @@ func validar() -> PackedStringArray:
 	avisos.clear()
 	for clave: String in CLAVES_DE_TEXTO:
 		texto(clave, "")
-	tutorial(PackedStringArray())
+	if tutorial(PackedStringArray()).size() < LINEAS_DEL_TUTORIAL:
+		_avisar("«inicio.tutorial» tiene que explicar las %d acciones: mouse, movimiento, salto, interacción y pausa." % LINEAS_DEL_TUTORIAL)
 	ids_de_cartas()
 	casas()
 	orden_de_entrega()

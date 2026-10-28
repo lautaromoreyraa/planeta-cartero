@@ -31,6 +31,11 @@ func configurar(nuevo_id: String, rotulo: String) -> void:
 	_rotulo.text = rotulo
 
 
+## Dónde está el buzón, para la guía (RF-30 CA4).
+func posicion_del_buzon() -> Vector3:
+	return _interactuable.global_position
+
+
 ## Un buzón entregado no acepta otra carta (RF-15 CA3): se apaga, así ni
 ## siquiera aparece la E, y la bandera levantada lo muestra de lejos.
 func marcar_entregado(entregado: bool) -> void:
